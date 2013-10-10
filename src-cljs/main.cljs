@@ -1,5 +1,13 @@
 (ns dumbbell.main
-  (:require [monet.canvas :as canvas]))
+  (:require [monet.canvas :as canvas]
+            [goog.events :as events]
+            [goog.events.EventType]))
+
+(def keycode->dir
+  {38 :up
+   40 :down
+   37 :left
+   39 :right})
 
 ;; Gameplay constants.
 (def game
@@ -56,8 +64,15 @@
   []
   (.requestAnimationFrame js/window tick))
 
+(defn process-keydown
+  [ev]
+  (when-let [dir (keycode->dir (.-keyCode ev))]
+    (reset! snake-dir dir)))
+
 (defn ^:export startgame
   [el]
   (reset! ctx (canvas/get-context el "2d"))
   (clear-bg)
-  (start-game-loop))
+  (start-game-loop)
+  (events/listen js/document goog.events.EventType.KEYDOWN
+                 process-keydown))
