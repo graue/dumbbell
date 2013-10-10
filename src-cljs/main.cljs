@@ -1,28 +1,44 @@
 (ns dumbbell.main
   (:require [monet.canvas :as canvas]))
 
+;; Gameplay constants.
+(def game
+  {:w 400 :h 400
+   :bg :black
+   :fg :white})
+
 (def ctx (atom nil))
 (def snake-dir (atom :right))
-(def snake-pos (atom {:x 200 :y 200}))
-(def snake-speed (atom 0.2))
+(def snake-pos (atom {:x (/ (:w game) 2)
+                      :y (/ (:h game) 2)}))
+(def snake-speed (atom 0.4))
 
 (defn clear-bg
   []
   (canvas/fill-style @ctx :black)
-  (canvas/fill-rect @ctx {:x 0 :y 0 :w 400 :h 400}))
+  (canvas/fill-rect @ctx {:x 0 :y 0 :w (:w game) :h (:h game)}))
 
 (defn put-pixel
   [ctx {:keys [x y]}]
   (canvas/fill-rect ctx {:x x :y y :w 1 :h 1}))
 
 (defn advance-snake
-  "Advance the snake one step in direction dir."
+  "Advance the snake one step in direction dir, returning
+   an updated pos."
   [pos dir speed]
   (cond
-    (= dir :left)  {:x (- (:x pos) speed) :y (:y pos)}
-    (= dir :right) {:x (+ (:x pos) speed) :y (:y pos)}
-    (= dir :up)    {:y (- (:y pos) speed) :x (:x pos)}
-    (= dir :down)  {:y (+ (:y pos) speed) :x (:x pos)}))
+    (= dir :left)  {:x (mod (- (:x pos) speed)
+                            (:w game))
+                    :y (:y pos)}
+    (= dir :right) {:x (mod (+ (:x pos) speed)
+                            (:w game))
+                    :y (:y pos)}
+    (= dir :up)    {:y (mod (- (:y pos) speed)
+                            (:h game))
+                    :x (:x pos)}
+    (= dir :down)  {:y (mod (+ (:y pos) speed)
+                            (:h game))
+                    :x (:x pos)}))
 
 (defn update-game-state
   []
