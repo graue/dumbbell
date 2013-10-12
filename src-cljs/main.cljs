@@ -43,7 +43,7 @@
 
 (defn clear-bg
   []
-  (canvas/fill-style @ctx :black)
+  (canvas/fill-style @ctx (:bg game))
   (canvas/fill-rect @ctx {:x 0 :y 0 :w (:w game) :h (:h game)}))
 
 (defn put-pixel
@@ -67,7 +67,7 @@
 (defn update-game-state
   []
   (swap! snake-pos advance-snake @snake-dir @snake-speed)
-  (canvas/fill-style @ctx :white)
+  (canvas/fill-style @ctx (:fg game))
   (put-pixel @ctx {:x (Math/floor (:x @snake-pos))
                    :y (Math/floor (:y @snake-pos))}))
 
