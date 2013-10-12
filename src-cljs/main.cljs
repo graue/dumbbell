@@ -40,6 +40,7 @@
 (def snake-pos (atom {:x (/ (:w game) 2)
                       :y (/ (:h game) 2)}))
 (def snake-speed (atom 0.4))
+(def dumbbell-pos (atom nil))
 
 (defn clear-bg
   []
@@ -55,6 +56,40 @@
   {:x (mod x (:w game))
    :y (mod y (:h game))})
 
+(def dumbbell-pixels
+  (for [y (range -2 3)
+        x (range -2 3)
+        :when (<= (Math/abs x) (Math/abs y))]
+    {:x x :y y}))
+
+(defn- real-dumbbell-pixels
+  [dbpos]
+  (map #(wrap-around (add-vek dbpos %)) dumbbell-pixels))
+
+(defn draw-dumbbell
+  [pos]
+  (canvas/fill-style @ctx (:fg game))
+  (doseq [pxpos (real-dumbbell-pixels pos)]
+    (put-pixel @ctx pxpos)))
+
+(defn place-dumbbell
+  []
+  (reset! dumbbell-pos
+          {:x (rand-int (:w game))
+           :y (rand-int (:h game))})
+  (draw-dumbbell @dumbbell-pos))
+
+(defn touching-dumbbell?
+  [spos dbpos]
+  (some #{spos} (real-dumbbell-pixels dbpos)))
+
+(defn erase-dumbbell
+  [pos]
+  (canvas/fill-style @ctx (:bg game))
+  (doseq [y (range -12 13)
+          x (range -12 13)]
+    (put-pixel @ctx (wrap-around (add-vek pos {:x x :y y})))))
+
 (defn advance-snake
   "Advance the snake one step in direction dir, returning
    an updated pos."
@@ -67,9 +102,17 @@
 (defn update-game-state
   []
   (swap! snake-pos advance-snake @snake-dir @snake-speed)
-  (canvas/fill-style @ctx (:fg game))
-  (put-pixel @ctx {:x (Math/floor (:x @snake-pos))
-                   :y (Math/floor (:y @snake-pos))}))
+  (let [int-pos {:x (Math/floor (:x @snake-pos))
+                 :y (Math/floor (:y @snake-pos))}]
+    (if (touching-dumbbell? int-pos @dumbbell-pos)
+      (do
+        (erase-dumbbell @dumbbell-pos)
+        ;; todo: add to score
+        (place-dumbbell))
+      (do
+        (canvas/fill-style @ctx (:fg game))
+        (put-pixel @ctx {:x (Math/floor (:x @snake-pos))
+                         :y (Math/floor (:y @snake-pos))})))))
 
 (defn tick
   []
@@ -89,6 +132,7 @@
   [el]
   (reset! ctx (canvas/get-context el "2d"))
   (clear-bg)
+  (place-dumbbell)
   (start-game-loop)
   (events/listen js/document goog.events.EventType.KEYDOWN
                  process-keydown))
