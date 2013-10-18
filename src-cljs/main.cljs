@@ -15,10 +15,10 @@
 (defrecord Vec2D [x y]
   VectorMath2D
     (v+ [v1 v2]
-      {:x (+ (:x v1)
-             (get v2 :x 0))
-       :y (+ (:y v1)
-             (get v2 :y 0))}))
+      (Vec2D. (+ (:x v1)
+                 (get v2 :x 0))
+              (+ (:y v1)
+                 (get v2 :y 0)))))
 
 (def dir->vec2d
   {:up    (Vec2D.  0 -1)
@@ -40,8 +40,8 @@
 
 (def ctx (atom nil))
 (def snake-dir (atom :right))
-(def snake-pos (atom (Vec2D. (/ (:w game) 2))
-                             (/ (:h game) 2)))
+(def snake-pos (atom (Vec2D. (/ (:w game) 2)
+                             (/ (:h game) 2))))
 (def snake-speed (atom 0.4))
 (def dumbbell-pos (atom nil))
 
