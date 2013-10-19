@@ -6,10 +6,20 @@
     <style type="text/css">
       .container { margin-left: auto; margin-right: auto;
                    max-width: 800px; }
+      .instructions {
+        float: right;
+        margin-top: 150px;
+        list-style-type: none;
+      }
     </style>
   </head>
   <body onload="dumbbell.main.startgame(document.getElementById('game'));">
     <div class="container">
+      <ul class="instructions">
+        <li>Change direction with arrow keys.</li>
+        <li>Collect dumbbells.</li>
+        <li>Don't hit your tail.</li>
+      </ul>
       <canvas id="game" width="400" height="400">
         Your browser does not support &lt;canvas&gt;. How lame.
       </canvas>
