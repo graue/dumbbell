@@ -10,7 +10,8 @@
    39 :right})
 
 (defprotocol VectorMath2D
-  (v+ [v1 v2] "Adds two vectors"))
+  (v+ [v1 v2] "Adds two vectors")
+  (vfloor [v] "Rounds both components down to nearest integer"))
 
 (defrecord Vec2D [x y]
   VectorMath2D
@@ -18,7 +19,10 @@
       (Vec2D. (+ (:x v1)
                  (get v2 :x 0))
               (+ (:y v1)
-                 (get v2 :y 0)))))
+                 (get v2 :y 0))))
+    (vfloor [v]
+      (Vec2D. (Math/floor (:x v))
+              (Math/floor (:y v)))))
 
 (def dir->vec2d
   {:up    (Vec2D.  0 -1)
@@ -36,7 +40,8 @@
 (def game
   {:w 400 :h 400
    :bg :black
-   :fg :white})
+   :fg :white
+   :fg-as-rgba {:red 255 :green 255 :blue 255 :alpha 255}})
 
 (def ctx (atom nil))
 (def snake-dir (atom :right))
@@ -104,18 +109,25 @@
 
 (defn update-game-state
   []
-  (swap! snake-pos advance-snake @snake-dir @snake-speed)
-  (let [int-pos (Vec2D. (Math/floor (:x @snake-pos))
-                        (Math/floor (:y @snake-pos)))]
-    (if (touching-dumbbell? int-pos @dumbbell-pos)
-      (do
-        (erase-dumbbell @dumbbell-pos)
-        ;; todo: add to score
-        (place-dumbbell))
-      (do
-        (canvas/fill-style @ctx (:fg game))
-        (put-pixel @ctx {:x (Math/floor (:x @snake-pos))
-                         :y (Math/floor (:y @snake-pos))})))))
+  (let [old-pix-pos (vfloor @snake-pos)
+        pos (swap! snake-pos advance-snake @snake-dir @snake-speed)
+        pix-pos (vfloor pos)]
+    (when (not= pix-pos old-pix-pos)
+      (cond
+        (touching-dumbbell? pix-pos @dumbbell-pos)
+          (do
+            (erase-dumbbell @dumbbell-pos)
+            ;; todo: add to score
+            (place-dumbbell))
+        (= (canvas/get-pixel @ctx (:x pix-pos) (:y pix-pos))
+           (:fg-as-rgba game))
+          (do
+            (reset! snake-speed 0) ;; todo: stop animation, proper game over
+            (js/alert "Game over"))
+        :else
+          (do
+            (canvas/fill-style @ctx (:fg game))
+            (put-pixel @ctx pix-pos))))))
 
 (defn tick
   []

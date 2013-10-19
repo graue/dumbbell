@@ -5,7 +5,7 @@ leaving a gap you can pass through in the future.
 
 ## Status
 
-Unfinished. Needs collision detection, frame-dropping to maintain
+Unfinished. Needs frame-dropping to maintain
 consistent speed, scoring, and needs to prevent you from turning
 around 180° (which would mean instant death with collision detection).
 
