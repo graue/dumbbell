@@ -5,9 +5,8 @@ leaving a gap you can pass through in the future.
 
 ## Status
 
-Unfinished. Needs frame-dropping to maintain
-consistent speed, scoring, and needs to prevent you from turning
-around 180° (which would mean instant death with collision detection).
+Playable. Could use scoring and probably frame-dropping to maintain
+consistent speed (or better, some optimization to make it smoother).
 
 This is one of my first ClojureScript projects, and I emphasized
 getting it done over code cleanliness. The code is no doubt more

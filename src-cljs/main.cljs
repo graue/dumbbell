@@ -9,6 +9,10 @@
    37 :left
    39 :right})
 
+(def opposite-dirs
+  [#{:up :down}
+   #{:left :right}])
+
 (defprotocol VectorMath2D
   (v+ [v1 v2] "Adds two vectors")
   (vfloor [v] "Rounds both components down to nearest integer"))
@@ -141,7 +145,8 @@
 (defn process-keydown
   [ev]
   (when-let [dir (keycode->dir (.-keyCode ev))]
-    (reset! snake-dir dir)))
+    (when (not-any? #{#{dir @snake-dir}} opposite-dirs)
+      (reset! snake-dir dir))))
 
 (defn ^:export startgame
   [el]
