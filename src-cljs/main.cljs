@@ -49,6 +49,7 @@
 
 (def ctx (atom nil))
 (def snake-dir (atom :right))
+(def next-snake-dir (atom :right))
 (def snake-pos (atom (Vec2D. (/ (:w game) 2)
                              (/ (:h game) 2))))
 (def snake-speed (atom 0.4))
@@ -105,7 +106,8 @@
 
 (defn update-game-state []
   (let [old-pix-pos (vfloor @snake-pos)
-        pos (swap! snake-pos advance-snake @snake-dir @snake-speed)
+        dir (reset! snake-dir @next-snake-dir)
+        pos (swap! snake-pos advance-snake dir @snake-speed)
         pix-pos (vfloor pos)]
     (when (not= pix-pos old-pix-pos)
       (cond
@@ -134,7 +136,7 @@
 (defn process-keydown [ev]
   (when-let [dir (keycode->dir (.-keyCode ev))]
     (when (not-any? #{#{dir @snake-dir}} opposite-dirs)
-      (reset! snake-dir dir))))
+      (reset! next-snake-dir dir))))
 
 (defn ^:export startgame [el]
   (reset! ctx (canvas/get-context el "2d"))
