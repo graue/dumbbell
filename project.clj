@@ -10,6 +10,6 @@
   :cljsbuild {:builds
                {:main {:source-paths ["src-cljs"]
                        :compiler {:output-to "js/main.js"
-                                  :optimizations :advanced
-                                  :pretty-print false}}}}
+                                  :optimizations :whitespace
+                                  :pretty-print true}}}}
   :source-paths ["no-clj-here"])
