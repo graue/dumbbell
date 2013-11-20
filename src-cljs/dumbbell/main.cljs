@@ -31,9 +31,9 @@
 (def ctx (atom nil))
 (def snake-dir (atom :right))
 (def next-snake-dir (atom :right))
-(def snake-pos (atom (Vec2D. (/ (:w game) 2)
-                             (/ (:h game) 2))))
-(def snake-speed (atom 0.4))
+(def snake-pos (atom (vfloor (Vec2D. (/ (:w game) 2)
+                                     (/ (:h game) 2)))))
+(def snake-speed (atom 24))  ; In pixels per second.
 (def dumbbell-pos (atom nil))
 
 (defn clear-bg []
@@ -79,40 +79,57 @@
 (defn advance-snake
   "Advance the snake one step in direction dir, returning
    an updated pos."
-  [pos dir speed]
+  [pos dir]
   (wrap-around
     (v+
       pos
-      (mapmap (partial * speed) (dir->vec2d dir)))))
+      (dir->vec2d dir))))
 
-(defn update-game-state []
-  (let [old-pix-pos (vfloor @snake-pos)
-        dir (reset! snake-dir @next-snake-dir)
-        pos (swap! snake-pos advance-snake dir @snake-speed)
-        pix-pos (vfloor pos)]
-    (when (not= pix-pos old-pix-pos)
-      (cond
-        (touching-dumbbell? pix-pos @dumbbell-pos)
-          (do
-            (erase-dumbbell @dumbbell-pos)
-            ;; todo: add to score
-            (place-dumbbell))
-        (= (canvas/get-pixel @ctx (:x pix-pos) (:y pix-pos))
-           (:fg-as-rgba game))
-          (do
-            (reset! snake-speed 0) ;; todo: stop animation, proper game over
-            (js/alert "Game over"))
-        :else
-          (do
-            (canvas/fill-style @ctx (:fg game))
-            (put-pixel @ctx pix-pos))))))
+(defn run-one-tick
+  "Advance the snake by one pixel and check for resulting collisions.
+  Since the game conflates drawing with data storage (we use get-pixel
+  to see if you've collided with yourself!), this also updates the
+  display."
+  []
+  (let [dir (reset! snake-dir @next-snake-dir)
+        pos (swap! snake-pos advance-snake dir)]
+    (cond
+      (touching-dumbbell? pos @dumbbell-pos)
+        (do
+          (erase-dumbbell @dumbbell-pos)
+          ;; todo: add to score
+          (place-dumbbell))
+      (= (canvas/get-pixel @ctx (:x pos) (:y pos))
+          (:fg-as-rgba game))
+        (do
+          (reset! snake-speed 0) ;; todo: stop animation, proper game over
+          (js/alert "Game over"))
+      :else
+        (do
+          (canvas/fill-style @ctx (:fg game))
+          (put-pixel @ctx pos)))))
 
-(defn tick []
-  (update-game-state)
-  (.requestAnimationFrame js/window tick))
+(declare spawn-ticker)
+
+(defn ticker [last-time fractional-ticks]
+  (let [new-time (new js/Date)
+        elapsed-ms (- new-time last-time)
+        elapsed-ticks (+ (* 0.001 @snake-speed elapsed-ms)
+                         fractional-ticks)
+        full-ticks (Math/floor elapsed-ticks)]
+
+    ;; Run logic for however many full ticks have passed, which may be zero.
+    (dotimes [_ full-ticks] (run-one-tick))
+
+    ;; Then spawn a new ticker, passing on any leftover fractional ticks.
+    (spawn-ticker new-time (- elapsed-ticks full-ticks))))
+
+(defn spawn-ticker [start-time fractional-ticks]
+  (.requestAnimationFrame js/window (fn []
+                                      (ticker start-time fractional-ticks))))
 
 (defn start-game-loop []
-  (.requestAnimationFrame js/window tick))
+  (spawn-ticker (new js/Date) 0))
 
 (defn process-keydown [ev]
   (when-let [dir (keycode->dir (.-keyCode ev))]
