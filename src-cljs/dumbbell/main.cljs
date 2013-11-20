@@ -33,7 +33,7 @@
 (def next-snake-dir (atom :right))
 (def snake-pos (atom (vfloor (Vec2D. (/ (:w game) 2)
                                      (/ (:h game) 2)))))
-(def snake-speed (atom 24))  ; In pixels per second.
+(def snake-speed (atom 30))  ; In pixels per second.
 (def dumbbell-pos (atom nil))
 
 (defn clear-bg []
