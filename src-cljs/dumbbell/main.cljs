@@ -12,8 +12,11 @@
    39 :right})
 
 (def opposite-dirs
-  [#{:up :down}
-   #{:left :right}])
+  #{#{:up :down}
+    #{:left :right}})
+
+(defn opposite? [from to]
+  (contains? opposite-dirs #{from to}))
 
 (defn mapmap
   "Return a hashmap like m, but with f applied to each value."
@@ -133,7 +136,7 @@
 
 (defn process-keydown [ev]
   (when-let [dir (keycode->dir (.-keyCode ev))]
-    (when (not-any? #{#{dir @snake-dir}} opposite-dirs)
+    (when-not (opposite? @snake-dir dir)
       (reset! next-snake-dir dir))))
 
 (defn ^:export startgame [el]
