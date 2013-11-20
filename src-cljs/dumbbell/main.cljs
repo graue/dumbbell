@@ -1,7 +1,9 @@
 (ns dumbbell.main
   (:require [monet.canvas :as canvas]
             [goog.events :as events]
-            [goog.events.EventType]))
+            [goog.events.EventType]
+            [dumbbell.vectors
+             :refer [Vec2D VectorMath2D dir->vec2d v+ vfloor]]))
 
 (def keycode->dir
   {38 :up
@@ -12,27 +14,6 @@
 (def opposite-dirs
   [#{:up :down}
    #{:left :right}])
-
-(defprotocol VectorMath2D
-  (v+ [v1 v2] "Adds two vectors")
-  (vfloor [v] "Rounds both components down to nearest integer"))
-
-(defrecord Vec2D [x y]
-  VectorMath2D
-    (v+ [v1 v2]
-      (Vec2D. (+ (:x v1)
-                 (get v2 :x 0))
-              (+ (:y v1)
-                 (get v2 :y 0))))
-    (vfloor [v]
-      (Vec2D. (Math/floor (:x v))
-              (Math/floor (:y v)))))
-
-(def dir->vec2d
-  {:up    (Vec2D.  0 -1)
-   :down  (Vec2D.  0  1)
-   :left  (Vec2D. -1  0)
-   :right (Vec2D.  1  0)})
 
 (defn mapmap
   "Return a hashmap like m, but with f applied to each value."
