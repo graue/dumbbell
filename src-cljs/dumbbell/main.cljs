@@ -32,6 +32,7 @@
    :fg-as-rgba {:red 255 :green 255 :blue 255 :alpha 255}})
 
 (def ctx (atom nil))
+(def playing (atom true))  ; False if game over, etc.
 (def snake-dir (atom :right))
 (def next-snake-dir (atom :right))
 (def snake-pos (atom (vfloor (Vec2D. (/ (:w game) 2)
@@ -105,7 +106,7 @@
       (= (canvas/get-pixel @ctx (:x pos) (:y pos))
           (:fg-as-rgba game))
         (do
-          (reset! snake-speed 0) ;; todo: stop animation, proper game over
+          (reset! playing false)
           (js/alert "Game over"))
       :else
         (do
@@ -122,10 +123,11 @@
         full-ticks (Math/floor elapsed-ticks)]
 
     ;; Run logic for however many full ticks have passed, which may be zero.
-    (dotimes [_ full-ticks] (run-one-tick))
+    (dotimes [_ full-ticks] (when @playing (run-one-tick)))
 
     ;; Then spawn a new ticker, passing on any leftover fractional ticks.
-    (spawn-ticker new-time (- elapsed-ticks full-ticks))))
+    (when @playing
+      (spawn-ticker new-time (- elapsed-ticks full-ticks)))))
 
 (defn spawn-ticker [start-time fractional-ticks]
   (.requestAnimationFrame js/window (fn []
