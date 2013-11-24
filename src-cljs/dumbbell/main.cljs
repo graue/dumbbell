@@ -33,6 +33,7 @@
 
 (def ctx (atom nil))
 (def playing (atom true))  ; False if game over, etc.
+(def focus-time (atom false))  ; When tab was focused, or false if blurred.
 (def snake-dir (atom :right))
 (def next-snake-dir (atom :right))
 (def snake-pos (atom (vfloor (Vec2D. (/ (:w game) 2)
@@ -117,6 +118,14 @@
 
 (defn ticker [last-time fractional-ticks]
   (let [new-time (new js/Date)
+
+        ; Ignore time that passed while the window/tab was inactive, by
+        ; setting last-time to the time the window was focused, if later.
+        ; Kind of a hack — can this be done better? The practical problem
+        ; here is, in FFx, requestAnimationFrame won't ever call our callback
+        ; if the tab isn't visible.
+        last-time (max last-time (or @focus-time new-time))
+
         elapsed-ms (- new-time last-time)
         elapsed-ticks (+ (* 0.001 @snake-speed elapsed-ms)
                          fractional-ticks)
@@ -147,4 +156,8 @@
   (place-dumbbell)
   (start-game-loop)
   (events/listen js/document goog.events.EventType.KEYDOWN
-                 process-keydown))
+                 process-keydown)
+  (events/listen js/window goog.events.EventType.FOCUS
+                 (fn [ev] (reset! focus-time (new js/Date))))
+  (events/listen js/window goog.events.EventType.BLUR
+                 (fn [ev] (reset! focus-time false))))
