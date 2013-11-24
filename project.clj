@@ -11,5 +11,9 @@
                {:main {:source-paths ["src-cljs"]
                        :compiler {:output-to "js/main.js"
                                   :optimizations :whitespace
-                                  :pretty-print true}}}}
+                                  :pretty-print true}}
+                :optimized {:source-paths ["src-cljs"]
+                            :compiler {:output-to "js/optimized/main.js"
+                                       :optimizations :advanced
+                                       :pretty-print false}}}}
   :source-paths ["no-clj-here"])
