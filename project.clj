@@ -3,9 +3,9 @@
   :license {:name "MIT License"
             :url "https://github.com/graue/luasynth/blob/master/MIT-LICENSE.txt"}
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/clojurescript "0.0-2030"]
-                 [rm-hull/monet "0.1.8"]]
-  :plugins [[lein-cljsbuild "0.3.3"]]
+                 [org.clojure/clojurescript "0.0-2080"]
+                 [rm-hull/monet "0.1.9"]]
+  :plugins [[lein-cljsbuild "1.0.0"]]
   :hooks [leiningen.cljsbuild]
   :cljsbuild {:builds
                {:main {:source-paths ["src-cljs"]
