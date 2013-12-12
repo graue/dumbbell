@@ -15,6 +15,9 @@
       (Vec2D. (Math/floor (:x v))
               (Math/floor (:y v)))))
 
+(defn vec2d [x y]
+  (Vec2D. x y))
+
 (def dir->vec2d
   {:up    (Vec2D.  0 -1)
    :down  (Vec2D.  0  1)

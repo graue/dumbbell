@@ -3,7 +3,7 @@
             [goog.events :as events]
             [goog.events.EventType]
             [dumbbell.vectors
-             :refer [Vec2D VectorMath2D dir->vec2d v+ vfloor]]))
+             :refer [vec2d dir->vec2d v+ vfloor]]))
 
 (def keycode->dir
   {38 :up
@@ -36,8 +36,8 @@
 (def focus-time (atom false))  ; When tab was focused, or false if blurred.
 (def snake-dir (atom :right))
 (def next-snake-dir (atom :right))
-(def snake-pos (atom (vfloor (Vec2D. (/ (:w game) 2)
-                                     (/ (:h game) 2)))))
+(def snake-pos (atom (vfloor (vec2d (/ (:w game) 2)
+                                    (/ (:h game) 2)))))
 (def snake-speed (atom 30))  ; In pixels per second.
 (def dumbbell-pos (atom nil))
 
@@ -49,14 +49,14 @@
   (canvas/fill-rect ctx {:x x :y y :w 1 :h 1}))
 
 (defn wrap-around [{:keys [x y]}]
-  (Vec2D. (mod x (:w game))
-          (mod y (:h game))))
+  (vec2d (mod x (:w game))
+         (mod y (:h game))))
 
 (def dumbbell-pixels
   (for [y (range -2 3)
         x (range -2 3)
         :when (<= (Math/abs x) (Math/abs y))]
-    (Vec2D. x y)))
+    (vec2d x y)))
 
 (defn- real-dumbbell-pixels [dbpos]
   (map #(wrap-around (v+ dbpos %)) dumbbell-pixels))
@@ -68,8 +68,8 @@
 
 (defn place-dumbbell []
   (reset! dumbbell-pos
-          (Vec2D. (rand-int (:w game))
-                  (rand-int (:h game))))
+          (vec2d (rand-int (:w game))
+                 (rand-int (:h game))))
   (draw-dumbbell @dumbbell-pos))
 
 (defn touching-dumbbell? [spos dbpos]
@@ -79,7 +79,7 @@
   (canvas/fill-style @ctx (:bg game))
   (doseq [y (range -12 13)
           x (range -12 13)]
-    (put-pixel @ctx (wrap-around (v+ pos (Vec2D. x y))))))
+    (put-pixel @ctx (wrap-around (v+ pos (vec2d x y))))))
 
 (defn advance-snake
   "Advance the snake one step in direction dir, returning
