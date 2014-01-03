@@ -4,13 +4,12 @@
   (v+ [v1 v2] "Adds two vectors")
   (vfloor [v] "Rounds both components down to nearest integer"))
 
+(declare map->Vec2D)
+
 (defrecord Vec2D [x y]
   VectorMath2D
     (v+ [v1 v2]
-      (Vec2D. (+ (:x v1)
-                 (get v2 :x 0))
-              (+ (:y v1)
-                 (get v2 :y 0))))
+      (map->Vec2D (merge-with + v1 v2)))
     (vfloor [v]
       (Vec2D. (Math/floor (:x v))
               (Math/floor (:y v)))))
